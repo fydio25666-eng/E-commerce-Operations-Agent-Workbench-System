@@ -13,7 +13,8 @@ import xlwt
 from openpyxl import Workbook, load_workbook
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ValidationError
 from openai import OpenAIError
 from langgraph.types import Command
@@ -790,3 +791,24 @@ async def export() -> StreamingResponse:
         media_type="application/vnd.ms-excel",
         headers={"Content-Disposition": 'attachment; filename="products.xls"'},
     )
+
+
+FRONTEND_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+FRONTEND_ASSETS = FRONTEND_DIST / "assets"
+if FRONTEND_DIST.is_dir() and (FRONTEND_DIST / "index.html").is_file():
+    if FRONTEND_ASSETS.is_dir():
+        app.mount("/assets", StaticFiles(directory=FRONTEND_ASSETS), name="frontend-assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_frontend(full_path: str):
+        if full_path == "api" or full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+
+        requested_file = (FRONTEND_DIST / full_path).resolve()
+        try:
+            requested_file.relative_to(FRONTEND_DIST.resolve())
+        except ValueError:
+            raise HTTPException(status_code=404, detail="File not found") from None
+        if requested_file.is_file():
+            return FileResponse(requested_file)
+        return FileResponse(FRONTEND_DIST / "index.html")
