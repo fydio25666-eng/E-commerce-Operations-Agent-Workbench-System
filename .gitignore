@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+ecommerce_agent.db
+*.db
+logs/
+frontend/node_modules/
+frontend/dist/
+商品表格.xls
+__pycache__/
+*.pyc
+.vscode/

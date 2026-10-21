@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+langgraph
+pydantic
+sqlalchemy
+asyncpg
+aiosqlite
+python-dotenv
+tenacity
+openai
+httpx
+python-multipart
+xlrd
+xlwt
+openpyxl
