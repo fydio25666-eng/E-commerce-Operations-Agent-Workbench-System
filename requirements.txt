@@ -13,3 +13,4 @@ python-multipart
 xlrd
 xlwt
 openpyxl
+greenlet>=3.0.0
